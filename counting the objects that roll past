@@ -1,0 +1,53 @@
+const int trigPin = 11;
+const int echoPin = 12;
+const int led = 8;
+const int detect = 30;
+int count = 0 ;
+
+long duration;
+int distance;
+bool objectPresent = false;
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(led, OUTPUT);
+
+  Serial.begin(9600);
+}
+
+// Its own function, outside setup() and loop()
+int readDistance() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH, 30000);
+  return duration * 0.034 / 2;
+}
+
+void loop() {
+  distance = readDistance();
+  bool detected = (distance > 0 && distance < detect);
+  
+
+  if (detected && !objectPresent) {
+    count = count + 1 ;
+    Serial.println("Object Detected & Present");
+    Serial.print(count) ;
+    digitalWrite(led, HIGH);
+    objectPresent = true;
+  }
+  else if (!detected && objectPresent) {
+    Serial.println("Detected Object Is Gone");
+    digitalWrite(led, LOW);
+    objectPresent = false;
+  }
+  else if (!detected && !objectPresent) {
+    Serial.println("Waiting To Detect Object");
+  }
+
+  delay(100);
+}
